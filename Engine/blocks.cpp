@@ -18,7 +18,7 @@ void Blocks::Initialize(D3DClass* D3D,int screenWidth,int screenHeight,int type,
 	m_Num = 0;
 	blocktypenum = 0;
 	m_cur_ftime = 0.f;
-	m_cur_time = 0;
+	m_cur_time = 0.f;
 	m_Ishard = ishard;
 	m_IsEnd = false;
 	m_IsSpeed = false;
@@ -38,7 +38,7 @@ void Blocks::Initialize(D3DClass* D3D,int screenWidth,int screenHeight,int type,
 		L"data/4.jpg" ,
 		L"data/5.jpg",
 		L"data/fire.jpg" };
-	//srand((unsigned int)time(NULL));
+	srand((unsigned int)time(NULL));
 	int color = rand() % 5;
 	if (type == 11) color = 5;
 	for (int i = 0; i < size; i++)
@@ -361,347 +361,194 @@ void Blocks::Shutdown()
 {
 }
 
-void Blocks::Updated(int& movex,int& movey,int type, float time)
+void Blocks::Updated(int& movex, int& movey, int type, float time)
 {
-	if (m_type != 11)
+
+	BlockDownUpdated(time);
+
+	if (m_Input->IsKeyDown(VK_SPACE) && !iskeydown[VK_SPACE])
 	{
-		if (!*m_Ishard)
+		iskeydown[VK_SPACE] = true;
+		toggle[VK_SPACE] = !toggle[VK_SPACE];
+		if (!m_IsSpeed)
 		{
-			if ((((int)m_cur_ftime - (int)time) == -1) || m_IsSpeed)
+			if ((*sound) != nullptr) (*sound)->PLAYsound("speed");
+			else
 			{
-				m_MoveY++;
-				for (int j = 0; j < size; j++)
-				{
-					for (int k = 0; k < size; k++)
-					{
-						if (m_Block[blocktypenum % 4][j][k].getIsFill())//그려주는 부분이 
-						{
-							if ((k + m_MoveY) >= 30)
-							{
-								m_MoveY--;
-								m_IsEnd = true;
-								return;
-							}
-							for (int x = 0; x < mapwidth; x++)
-							{
-								for (int y = 0; y < mapheight; y++)
-								{
-									if (m_Map[x][y].getIsFill())
-									{
-										if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-										{
-											m_MoveY--;
-											m_IsEnd = true;
-											return;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				(*sound)->PLAYsound("speed");
 			}
 		}
-		else
-		{
-			if (!((m_cur_ftime - time) < 0.01f && (m_cur_ftime - time) > -0.01f) || m_IsSpeed)
-			{
-				m_MoveY++;
-				for (int j = 0; j < size; j++)
-				{
-					for (int k = 0; k < size; k++)
-					{
-						if (m_Block[blocktypenum % 4][j][k].getIsFill())
-						{
-							if ((k + m_MoveY) >= 30)
-							{
-								m_MoveY--;
-								m_IsEnd = true;
-								return;
-							}
-							for (int x = 0; x < mapwidth; x++)
-							{
-								for (int y = 0; y < mapheight; y++)
-								{
-									if (m_Map[x][y].getIsFill())
-									{
-										if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-										{
-											m_MoveY--;
-											m_IsEnd = true;
-											return;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		m_cur_ftime = time;
+		m_IsSpeed = true;
+	}
+	if (!m_Input->IsKeyDown(VK_SPACE) && iskeydown[VK_SPACE] || toggle[VK_SPACE])
+	{
+		iskeydown[VK_SPACE] = false;
+		toggle[VK_SPACE] = !toggle[VK_SPACE];
+	}
 
-		if (m_Input->IsKeyDown(VK_SPACE) && !iskeydown[VK_SPACE])
-		{
-			iskeydown[VK_SPACE] = true;
-			toggle[VK_SPACE] = !toggle[VK_SPACE];
-			if (!m_IsSpeed)
-			{
-				if((*sound)!=nullptr) (*sound)->PLAYsound("speed");
-				else
-				{
-					(*sound)->PLAYsound("speed");
-				}
-			}
-			m_IsSpeed = true;
-		}
-		if (!m_Input->IsKeyDown(VK_SPACE) && iskeydown[VK_SPACE])
-		{
-			iskeydown[VK_SPACE] = false;
-		}
+	if (m_Input->IsKeyDown(VK_UP) && !iskeydown[VK_UP] && !m_IsSpeed)
+	{
+		iskeydown[VK_UP] = true;
+		toggle[VK_UP] = !toggle[VK_UP];
+		blocktypenum++;
 
-		if (m_Input->IsKeyDown(VK_UP) && !iskeydown[VK_UP] && !m_IsSpeed)
+		for (int j = 0; j < size; j++)
 		{
-			iskeydown[VK_UP] = true;
-			toggle[VK_UP] = !toggle[VK_UP];
-			blocktypenum++;
-
-			for (int j = 0; j < size; j++)
+			for (int k = 0; k < size; k++)
 			{
-				for (int k = 0; k < size; k++)
+				if (m_Block[blocktypenum % 4][j][k].getIsFill())//4x4블락중에서 그려주고 있는 부분
 				{
-					if (m_Block[blocktypenum % 4][j][k].getIsFill())//4x4블락중에서 그려주고 있는 부분
+					if ((j + m_MoveX) < 0)
 					{
-						if ((j + m_MoveX) < 0)
+						blocktypenum--;
+						return;
+					}
+					if ((j + m_MoveX) >= 15)
+					{
+						blocktypenum--;
+						return;
+					}
+					if ((k + m_MoveY) >= 30)
+					{
+						blocktypenum--;
+						return;
+					}
+					for (int x = 0; x < mapwidth; x++)
+					{
+						for (int y = 0; y < mapheight; y++)
 						{
-							blocktypenum--;
-							return;
-						}
-						if ((j + m_MoveX) >= 15)
-						{
-							blocktypenum--;
-							return;
-						}
-						if ((k + m_MoveY) >= 30)
-						{
-							blocktypenum--;
-							return;
-						}
-						for (int x = 0; x < mapwidth; x++)
-						{
-							for (int y = 0; y < mapheight; y++)
+							if (m_Map[x][y].getIsFill())
 							{
-								if (m_Map[x][y].getIsFill())
+								if ((k + m_MoveY) == y && (j + m_MoveX) == x)
 								{
-									if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-									{
-										blocktypenum--;
-									}
+									blocktypenum--;
 								}
 							}
 						}
 					}
 				}
 			}
-		}
-		if (!m_Input->IsKeyDown(VK_UP) && iskeydown[VK_UP] && !m_IsSpeed)
-		{
-			iskeydown[VK_UP] = false;
-		}
-		if (m_Input->IsKeyDown(VK_LEFT) && !iskeydown[VK_LEFT] && !m_IsSpeed)
-		{
-			iskeydown[VK_LEFT] = true;
-			toggle[VK_LEFT] = !toggle[VK_LEFT];
-			m_MoveX--;
-			for (int j = 0; j < size; j++)
-			{
-				for (int k = 0; k < size; k++)
-				{
-					if (m_Block[blocktypenum % 4][j][k].getIsFill())
-					{
-						if ((j + m_MoveX) < 0)
-						{
-							m_MoveX++;
-							return;
-						}
-						for (int x = 0; x < mapwidth; x++)
-						{
-							for (int y = 0; y < mapheight; y++)
-							{
-								if (m_Map[x][y].getIsFill())
-								{
-									if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-									{
-										m_MoveX++;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (!m_Input->IsKeyDown(VK_LEFT) && iskeydown[VK_LEFT] && !m_IsSpeed)
-		{
-			iskeydown[VK_LEFT] = false;
-		}
-		if (m_Input->IsKeyDown(VK_RIGHT) && !iskeydown[VK_RIGHT] && !m_IsSpeed)
-		{
-			iskeydown[VK_RIGHT] = true;
-			toggle[VK_RIGHT] = !toggle[VK_RIGHT];
-			m_MoveX++;
-			for (int j = 0; j < size; j++)
-			{
-				for (int k = 0; k < size; k++)
-				{
-					if (m_Block[blocktypenum % 4][j][k].getIsFill())
-					{
-						if ((j + m_MoveX) >= 15)
-						{
-							m_MoveX--;
-							return;
-						}
-						for (int x = 0; x < mapwidth; x++)
-						{
-							for (int y = 0; y < mapheight; y++)
-							{
-								if (m_Map[x][y].getIsFill())
-								{
-									if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-									{
-										m_MoveX--;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (!m_Input->IsKeyDown(VK_RIGHT) && iskeydown[VK_RIGHT] && !m_IsSpeed)
-		{
-			iskeydown[VK_RIGHT] = false;
-		}
-		if (m_Input->IsKeyDown(VK_DOWN) && !iskeydown[VK_DOWN] && !m_IsSpeed)
-		{
-			iskeydown[VK_DOWN] = true;
-			toggle[VK_DOWN] = !toggle[VK_DOWN];
-			m_MoveY++;
-			for (int j = 0; j < size; j++)
-			{
-				for (int k = 0; k < size; k++)
-				{
-					if (m_Block[blocktypenum % 4][j][k].getIsFill())
-					{
-						if ((k + m_MoveY) >= 30)
-						{
-							m_MoveY--;
-							return;
-						}
-						for (int x = 0; x < mapwidth; x++)
-						{
-							for (int y = 0; y < mapheight; y++)
-							{
-								if (m_Map[x][y].getIsFill())
-								{
-									if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-									{
-										m_MoveY--;
-										m_IsEnd = true;
-										return;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		if (!m_Input->IsKeyDown(VK_DOWN) && iskeydown[VK_DOWN] && !m_IsSpeed)
-		{
-			iskeydown[VK_DOWN] = false;
 		}
 	}
-	else
+	if (!m_Input->IsKeyDown(VK_UP) && iskeydown[VK_UP] && !m_IsSpeed)
 	{
-		if (!*m_Ishard)
-		{
-			if ((((int)m_cur_ftime - (int)time) == -1) || m_IsSpeed)
-			{
-				m_MoveY++;
-				for (int j = 0; j < size; j++)
-				{
-					for (int k = 0; k < size; k++)
-					{
-						if (m_Block[blocktypenum % 4][j][k].getIsFill())//그려주는 부분이 
-						{
-							if ((k + m_MoveY) >= 30)
-							{
-								m_MoveY--;
-								m_IsEnd = true;
-								return;
-							}
-							for (int x = 0; x < mapwidth; x++)
-							{
-								for (int y = 0; y < mapheight; y++)
-								{
-									if (m_Map[x][y].getIsFill())
-									{
-										if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-										{
-											m_MoveY--;
-											m_IsEnd = true;
-											return;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		else
-		{
-			if (!((m_cur_ftime - time) < 0.01f && (m_cur_ftime - time) > -0.01f) || m_IsSpeed)
-			{
-				m_MoveY++;
-				for (int j = 0; j < size; j++)
-				{
-					for (int k = 0; k < size; k++)
-					{
-						if (m_Block[blocktypenum % 4][j][k].getIsFill())
-						{
-							if ((k + m_MoveY) >= 30)
-							{
-								m_MoveY--;
-								m_IsEnd = true;
-								return;
-							}
-							for (int x = 0; x < mapwidth; x++)
-							{
-								for (int y = 0; y < mapheight; y++)
-								{
-									if (m_Map[x][y].getIsFill())
-									{
-										if ((k + m_MoveY) == y && (j + m_MoveX) == x)
-										{
-											m_MoveY--;
-											m_IsEnd = true;
-											return;
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		m_cur_ftime = time;
+		iskeydown[VK_UP] = false;
 	}
+	if (m_Input->IsKeyDown(VK_LEFT) && !iskeydown[VK_LEFT] && !m_IsSpeed)
+	{
+		iskeydown[VK_LEFT] = true;
+		toggle[VK_LEFT] = !toggle[VK_LEFT];
+		m_MoveX--;
+		for (int j = 0; j < size; j++)
+		{
+			for (int k = 0; k < size; k++)
+			{
+				if (m_Block[blocktypenum % 4][j][k].getIsFill())
+				{
+					if ((j + m_MoveX) < 0)
+					{
+						m_MoveX++;
+						return;
+					}
+					for (int x = 0; x < mapwidth; x++)
+					{
+						for (int y = 0; y < mapheight; y++)
+						{
+							if (m_Map[x][y].getIsFill())
+							{
+								if ((k + m_MoveY) == y && (j + m_MoveX) == x)
+								{
+									m_MoveX++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (!m_Input->IsKeyDown(VK_LEFT) && iskeydown[VK_LEFT] && !m_IsSpeed)
+	{
+		iskeydown[VK_LEFT] = false;
+	}
+	if (m_Input->IsKeyDown(VK_RIGHT) && !iskeydown[VK_RIGHT] && !m_IsSpeed)
+	{
+		iskeydown[VK_RIGHT] = true;
+		toggle[VK_RIGHT] = !toggle[VK_RIGHT];
+		m_MoveX++;
+		for (int j = 0; j < size; j++)
+		{
+			for (int k = 0; k < size; k++)
+			{
+				if (m_Block[blocktypenum % 4][j][k].getIsFill())
+				{
+					if ((j + m_MoveX) >= 15)
+					{
+						m_MoveX--;
+						return;
+					}
+					for (int x = 0; x < mapwidth; x++)
+					{
+						for (int y = 0; y < mapheight; y++)
+						{
+							if (m_Map[x][y].getIsFill())
+							{
+								if ((k + m_MoveY) == y && (j + m_MoveX) == x)
+								{
+									m_MoveX--;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (!m_Input->IsKeyDown(VK_RIGHT) && iskeydown[VK_RIGHT] && !m_IsSpeed)
+	{
+		iskeydown[VK_RIGHT] = false;
+	}
+	if (m_Input->IsKeyDown(VK_DOWN) && !iskeydown[VK_DOWN] && !m_IsSpeed)
+	{
+		iskeydown[VK_DOWN] = true;
+		toggle[VK_DOWN] = !toggle[VK_DOWN];
+		m_MoveY++;
+		for (int j = 0; j < size; j++)
+		{
+			for (int k = 0; k < size; k++)
+			{
+				if (m_Block[blocktypenum % 4][j][k].getIsFill())
+				{
+					if ((k + m_MoveY) >= 30)
+					{
+						m_MoveY--;
+						return;
+					}
+					for (int x = 0; x < mapwidth; x++)
+					{
+						for (int y = 0; y < mapheight; y++)
+						{
+							if (m_Map[x][y].getIsFill())
+							{
+								if ((k + m_MoveY) == y && (j + m_MoveX) == x)
+								{
+									m_MoveY--;
+									m_IsEnd = true;
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	if (!m_Input->IsKeyDown(VK_DOWN) && iskeydown[VK_DOWN] && !m_IsSpeed)
+	{
+		iskeydown[VK_DOWN] = false;
+	}
+	m_cur_ftime = time;
 }
-
 bool Blocks::Render(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX orthoMatrix)
 {
 
@@ -717,4 +564,58 @@ bool Blocks::Render(D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, D3DXMATRIX or
 		}
 	}
 	return true;
+}
+
+void Blocks::BlockDown()
+{
+	m_MoveY++;
+	for (int j = 0; j < size; j++)
+	{
+		for (int k = 0; k < size; k++)
+		{
+			if (m_Block[blocktypenum % 4][j][k].getIsFill())//그려주는 부분이 
+			{
+				if ((k + m_MoveY) >= 30)
+				{
+					m_MoveY--;
+					m_IsEnd = true;
+					return;
+				}
+				for (int x = 0; x < mapwidth; x++)
+				{
+					for (int y = 0; y < mapheight; y++)
+					{
+						if (m_Map[x][y].getIsFill())
+						{
+							if ((k + m_MoveY) == y && (j + m_MoveX) == x)
+							{
+								m_MoveY--;
+								m_IsEnd = true;
+								return;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Blocks::BlockDownUpdated(float time)
+{
+	if (!*m_Ishard)
+	{
+		if ((((int)m_cur_time - (int)time) == -1) || m_IsSpeed)
+		{
+			BlockDown();
+		}
+	}
+	else
+	{
+		if (!((m_cur_time - time) < 0.01f && (m_cur_time - time) > -0.01f) || m_IsSpeed)
+		{
+			BlockDown();
+		}
+	}
+	m_cur_time = time;
 }

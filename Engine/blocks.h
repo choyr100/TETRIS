@@ -17,6 +17,8 @@ public:
 	void Shutdown();
 	void Updated(int&,int&, int, float);
 	bool Render(D3DXMATRIX, D3DXMATRIX, D3DXMATRIX);
+	void BlockDown();
+	void BlockDownUpdated(float);
 	bool getIsEnd()
 	{
 		return m_IsEnd;
@@ -75,7 +77,7 @@ private:
 	bool* m_Ishard;
 	InputClass* m_Input;
 	float m_cur_ftime;
-	int m_cur_time;
+	float m_cur_time;
 	bool m_IsEnd;
 	bool m_IsSpeed;
 	cSound** sound;

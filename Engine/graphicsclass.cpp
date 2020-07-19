@@ -258,7 +258,7 @@ bool GraphicsClass::Frame(int fps,int cpu,float frametime)
 	m_game->Update(frametime);
 
 	m_Text->SetFps(fps, m_D3D->GetDeviceContext());
-	m_Text->SetTime(frametime, m_D3D->GetDeviceContext());
+	//m_Text->SetTime(frametime, m_D3D->GetDeviceContext());
 
 	// Update the rotation variable each frame.
 	rotation += (float)D3DX_PI * 0.005f;

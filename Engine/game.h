@@ -40,6 +40,7 @@ public:
 	void Initialize();
 	void Initialize(bool);
 	void Shutdown();
+	void GetTime();
 	void setD3D(D3DClass* D3D)
 	{
 		m_D3D = D3D;
@@ -189,5 +190,7 @@ private:
 	Blocks* m_Item;
 
 	bool m_IsEraserSound;
+	
+	float m_ftime;
 
 };

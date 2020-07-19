@@ -10,6 +10,7 @@ void Game::Initialize()
 	mapheight = 30;
 	screenWidth = 800;
 	screenHeight = 600;
+	m_ftime = 0.f;
 	hard = false;
 	blocktypenum = 0;
 	m_BlockCount = 0;
@@ -94,6 +95,7 @@ void Game::Initialize(bool isresound)
 	mapheight = 30;
 	screenWidth = 800;
 	screenHeight = 600;
+	m_ftime = 0.f;
 	hard = false;
 	blocktypenum = 0;
 	m_BlockCount = 0;
@@ -180,16 +182,25 @@ void Game::Shutdown()
 	}
 }
 
+void Game::GetTime()
+{
+	if (timeGetTime() >= (m_cur_ftime + 500))
+	{
+		m_ftime += 0.5f;
+		m_cur_ftime = timeGetTime();
+	}
+}
+
 void Game::Update(float _time)
 {
-
-	if (_time - m_end_time > 60) hard = true; // 난이도 시간
+	if(!m_IsStop && !m_IsEnd) GetTime();
+	if (m_ftime - m_end_time > 60) hard = true; // 난이도 시간
 
 	if (!hard)
 	{
 		blocklimitnum = 5;
 		m_UIText[0]->SetText("Mode: Easy", m_D3D->GetDeviceContext(), 400, 300, 1.0f, 1.0f, 1.0f);
-		if ((((int)m_cur_ftime - (int)_time) == -1))
+		if ((((int)m_cur_ftime - (int)m_ftime) == -1))
 		{
 			
 		}
@@ -198,13 +209,13 @@ void Game::Update(float _time)
 	{
 		blocklimitnum = 11;
 		m_UIText[0]->SetText("Mode: Hard", m_D3D->GetDeviceContext(), 400, 300, 1.0f, 0.0f, 0.0f);
-		if (!((m_cur_ftime - _time) < 0.01f && (m_cur_ftime - _time) > -0.01f))
+		if (!((m_cur_ftime - m_ftime) < 0.01f && (m_cur_ftime - m_ftime) > -0.01f))
 		{
 			
 		}
 	}
-	m_UIText[1]->SetTime(_time - m_end_time, m_D3D->GetDeviceContext());
-	m_cur_ftime = _time;
+
+	m_UIText[1]->SetTime(m_ftime, m_D3D->GetDeviceContext());
 
 	if (m_Input->IsKeyDown(VK_RETURN) && !iskeydown[VK_RETURN])
 	{
@@ -222,7 +233,7 @@ void Game::Update(float _time)
 	{
 		iskeydown[0x52] = true;
 		toggle[0x52] = !toggle[0x52];
-		m_end_time = _time;
+		m_end_time = m_cur_ftime;
 		//sound->PLAYsound("bgm");
 		m_Score = 0;
 		m_IsEnd = false;
@@ -243,7 +254,7 @@ void Game::Update(float _time)
 
 	if (!m_IsPrev)
 	{
-		std::srand((unsigned int)time(NULL));
+		std::srand(_time);
 		m_PrvBlocks = new Blocks;
 		m_PrvBlocks->Initialize(m_D3D, screenWidth, screenHeight, rand() % blocklimitnum, m_TextureShader, m_Input, m_Bitmap, iskeydown, toggle,&hard, &sound);
 		m_PrvBlocks->setMoveX(20);
@@ -257,7 +268,7 @@ void Game::Update(float _time)
 		return;
 	}
 	m_MainBlocks->Updated(m_MoveX,m_MoveY,blocktypenum, _time);
-	if(m_Item!=0) m_Item->Updated(m_MoveX, m_MoveY, blocktypenum, _time);
+	if(m_Item!=0) m_Item->BlockDownUpdated(_time);
 
 	if (m_Item != 0)
 	{
@@ -430,7 +441,7 @@ void Game::Update(float _time)
 		m_MainBlocks = m_ArrayBlocks[m_BlockCount];
 		m_MainBlocks->setMoveX(5);
 		m_MainBlocks->setMoveY(-3);
-		if (rand() % 100 == 0 && m_Item==0) // 확률 아이템 확률
+		if (rand() % 10 == 0 && m_Item==0) // 확률 아이템 확률
 		{
  			m_Item = new Blocks;
 			m_Item->Initialize(m_D3D, screenWidth, screenHeight, 11, m_TextureShader, m_Input, m_Bitmap, iskeydown, toggle, &hard, &sound);
