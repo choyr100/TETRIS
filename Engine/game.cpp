@@ -106,6 +106,7 @@ void Game::Initialize(bool isresound)
 	m_Item = 0;
 	m_IsEraserSound = false;
 	int arraysize = m_ArrayBlocks.size();
+	delete m_PrvBlocks;
 	for (int i = 0; i < arraysize; i++)
 	{
 		delete m_ArrayBlocks[0];
