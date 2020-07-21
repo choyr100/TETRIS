@@ -126,14 +126,11 @@ void Game::Initialize(bool isresound)
 	m_ArrayBlocks.push_back(new Blocks());
 	if (!hard) blocklimitnum = 5;
 	else blocklimitnum = 11;
-	sound->PLAYsound("bgm");
+	if(isresound) sound->PLAYsound("bgm");
 	m_ArrayBlocks[0]->Initialize(m_D3D, screenWidth, screenHeight, rand() % blocklimitnum, m_TextureShader, m_Input, m_Bitmap, iskeydown, toggle, &hard, &sound);
 	m_MainBlocks = m_ArrayBlocks[0];
 
 	fileLoad();
-
-
-
 }
 
 void Game::Shutdown()
