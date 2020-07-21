@@ -19,6 +19,7 @@ BitmapClass::BitmapClass(const BitmapClass& other)
 
 BitmapClass::~BitmapClass()
 {
+	Shutdown();
 }
 
 

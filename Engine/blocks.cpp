@@ -1,5 +1,18 @@
 #include "blocks.h"
 
+Blocks::~Blocks()
+{
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			delete[] m_Block[i][j];
+		}
+		delete[] m_Block[i];
+	}
+	delete[] m_Block;
+}
+
 void Blocks::Initialize(D3DClass* D3D,int screenWidth,int screenHeight,int type, TextureShaderClass* textureShader, InputClass* input, BitmapClass** map, bool* keydown, bool* tog, bool* ishard, cSound** _sound)
 {
 	iskeydown = keydown;

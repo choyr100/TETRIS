@@ -87,8 +87,6 @@ void Game::Initialize()
 
 void Game::Initialize(bool isresound)
 {
-	if(isresound) sound = 0;
-	m_Text = 0;
 	m_MoveX = 0;
 	m_MoveY = 0;
 	mapwidth = 15;
@@ -105,63 +103,30 @@ void Game::Initialize(bool isresound)
 	m_IsStop = false;
 	m_StopText = false;
 	m_cur_ftime = m_end_time;
-	m_Bitmap = 0;
-	m_Text = 0;
 	m_Item = 0;
 	m_IsEraserSound = false;
-	m_Bitmap = new BitmapClass*[mapwidth];
 	int arraysize = m_ArrayBlocks.size();
-	for (int i = 0; i<arraysize; i++) m_ArrayBlocks.erase(m_ArrayBlocks.begin());
-	for (int i = 0; i < mapwidth; i++)
+	for (int i = 0; i < arraysize; i++)
 	{
-		m_Bitmap[i] = new BitmapClass[mapheight];
+		delete m_ArrayBlocks[0];
+		m_ArrayBlocks.erase(m_ArrayBlocks.begin());
 	}
+	m_ArrayBlocks.clear();
 	for (int i = 0; i < mapwidth; i++)
 	{
 		for (int j = 0; j < mapheight; j++)
 		{
-			m_Bitmap[i][j].Initialize(m_D3D->GetDevice(), screenWidth, screenHeight, L"data/0.jpg", 16, 16);
+			m_Bitmap[i][j].setIsFill(false);
+			m_Bitmap[i][j].setIsFinish(false);
 		}
 	}
-
-	m_Text = new TextClass;
-
-	for (int i = 0; i < 10; i++)
-	{
-		m_Rank[i] = new TextClass;
-		m_Rank[i]->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), *m_hwnd, screenWidth, screenHeight, baseViewMatrix);
-
-		if (i < 5)
-		{
-			m_UIText[i] = new TextClass;
-			switch (i)
-			{
-			case 0:
-				m_UIText[i]->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), *m_hwnd, screenWidth, screenHeight, baseViewMatrix, 128, "Mode: Easy", 1.f, 1.f, 1.f, 400, 300);
-				break;
-			case 1:
-				m_UIText[i]->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), *m_hwnd, screenWidth, screenHeight, baseViewMatrix, 128, "Enter: Stop, ESC: esc , R: restart", 1.f, 1.f, 1.f, 600, 400);
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	// Initialize the text object.
-	m_Text->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), *m_hwnd, screenWidth, screenHeight, baseViewMatrix);
+	m_UIText[0]->SetText("Mode: Easy", m_D3D->GetDeviceContext(), 400, 300, 1.0f, 0.0f, 1.0f);
 
 	std::srand((unsigned int)time(NULL));
 	m_ArrayBlocks.push_back(new Blocks());
 	if (!hard) blocklimitnum = 5;
 	else blocklimitnum = 11;
-	if (isresound) sound = new cSound;
+	sound->PLAYsound("bgm");
 	m_ArrayBlocks[0]->Initialize(m_D3D, screenWidth, screenHeight, rand() % blocklimitnum, m_TextureShader, m_Input, m_Bitmap, iskeydown, toggle, &hard, &sound);
 	m_MainBlocks = m_ArrayBlocks[0];
 
@@ -194,7 +159,7 @@ void Game::GetTime()
 void Game::Update(float _time)
 {
 	if(!m_IsStop && !m_IsEnd) GetTime();
-	if (m_ftime - m_end_time > 60) hard = true; // 난이도 시간
+	if (m_ftime - m_end_time > 100) hard = true; // 난이도 시간
 
 	if (!hard)
 	{
@@ -234,7 +199,6 @@ void Game::Update(float _time)
 		iskeydown[0x52] = true;
 		toggle[0x52] = !toggle[0x52];
 		m_end_time = m_cur_ftime;
-		//sound->PLAYsound("bgm");
 		m_Score = 0;
 		m_IsEnd = false;
 		Initialize(true);
@@ -434,14 +398,14 @@ void Game::Update(float _time)
 				}
 			}
 		}
-
+		
 		m_IsEraserSound = false;
 		m_BlockCount++;
 		m_ArrayBlocks.push_back(m_PrvBlocks);
 		m_MainBlocks = m_ArrayBlocks[m_BlockCount];
 		m_MainBlocks->setMoveX(5);
 		m_MainBlocks->setMoveY(-3);
-		if (rand() % 10 == 0 && m_Item==0) // 확률 아이템 확률
+		if (rand() % 50 == 0 && m_Item==0) // 확률 아이템 확률
 		{
  			m_Item = new Blocks;
 			m_Item->Initialize(m_D3D, screenWidth, screenHeight, 11, m_TextureShader, m_Input, m_Bitmap, iskeydown, toggle, &hard, &sound);

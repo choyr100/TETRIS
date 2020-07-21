@@ -27,13 +27,14 @@ public:
 
 	void offBGM()
 	{
-		initSound->release();
+		channels[0]->stop();
 	}
 
 public:
 	FMOD::System   * System;
 
 private:
+	int m_buffer;
 	FMOD::Sound   * initSound;
 	FMOD::Sound   * Stage_1_Sound;
 	FMOD::Sound   * fireSound;
@@ -41,4 +42,5 @@ private:
 	FMOD::Sound   * DestroySound;
 	FMOD::Sound   * explosionSound;
 	FMOD::Channel  * channel;
+	FMOD::Channel** channels;
 };

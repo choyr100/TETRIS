@@ -13,6 +13,9 @@
 class Blocks
 {
 public:
+
+	~Blocks();
+
 	void Initialize(D3DClass*, int, int, int, TextureShaderClass*, InputClass*, BitmapClass**, bool*, bool*, bool*,cSound**);
 	void Shutdown();
 	void Updated(int&,int&, int, float);

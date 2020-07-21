@@ -11,11 +11,14 @@ cSound::cSound(void)
 	DestroySound = NULL;
 	explosionSound = NULL;
 	channel = NULL;
+	m_buffer = 6;
 	LOADSoundAll();//sound loading 클래스 생성시 한번만 호출
 
+	channels = new FMOD::Channel*[m_buffer];
+
 	FMOD_RESULT  result;
-	result = System->playSound(FMOD_CHANNEL_FREE, initSound, FALSE, &channel);
-	channel->setVolume(0.5f);
+	result = System->playSound(FMOD_CHANNEL_REUSE, initSound, FALSE, &channels[0]);
+	channels[0]->setVolume(1.f);
 	ERRCHECK(result);
 }
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -30,7 +33,7 @@ void cSound::LOADSoundAll()
 	result = FMOD::System_Create(&System);
 	ERRCHECK(result);
 
-	result = System->init(100, FMOD_INIT_NORMAL, 0);
+	result = System->init(6, FMOD_INIT_NORMAL, 0);
 	ERRCHECK(result);
 
 	result = System->createSound("data/01 Welcome to PUYOTETRIS!!.mp3", FMOD_LOOP_NORMAL, 0, &initSound);
@@ -71,42 +74,43 @@ void cSound::PLAYsound(const std::string& sound_name)
 	if (sound_name == "bgm")
 	{
 		//initSound->release();
-		result = System->playSound(FMOD_CHANNEL_FREE, initSound, FALSE, &channel);
-		channel->setVolume(1.f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, initSound, FALSE, &channels[0]);
+		channels[0]->setVolume(1.f);
+		ERRCHECK(result);
 	}
 	else if (sound_name == "speed")
 	{
 		//initSound->release();
-		result = System->playSound(FMOD_CHANNEL_FREE, Stage_1_Sound, FALSE, &channel);
-		channel->setVolume(1.f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, Stage_1_Sound, FALSE, &channels[1]);
+		channels[1]->setVolume(1.f);
 		ERRCHECK(result);
 	}
 
 	else if (sound_name == "end")
 	{
-		result = System->playSound(FMOD_CHANNEL_FREE, fireSound, FALSE, &channel);
-		channel->setVolume(0.5f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, fireSound, FALSE, &channels[2]);
+		channels[2]->setVolume(0.5f);
 		ERRCHECK(result);
 	}
 
 	else if (sound_name == "eraser")
 	{
-		result = System->playSound(FMOD_CHANNEL_FREE, laserSound, FALSE, &channel);
-		channel->setVolume(2.5f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, laserSound, FALSE, &channels[3]);
+		channels[3]->setVolume(2.5f);
 		ERRCHECK(result);
 	}
 
 	else if (sound_name == "destroy")
 	{
-		result = System->playSound(FMOD_CHANNEL_FREE, DestroySound, FALSE, &channel);
-		channel->setVolume(0.25f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, DestroySound, FALSE, &channels[4]);
+		channels[4]->setVolume(0.25f);
 		ERRCHECK(result);
 	}
 
 	else if (sound_name == "explosion_sound")
 	{
-		result = System->playSound(FMOD_CHANNEL_FREE, explosionSound, FALSE, &channel);
-		channel->setVolume(1.f);
+		result = System->playSound(FMOD_CHANNEL_REUSE, explosionSound, FALSE, &channels[5]);
+		channels[5]->setVolume(1.f);
 		ERRCHECK(result);
 	}
 }
